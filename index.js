@@ -24,8 +24,8 @@ app.post('/process-text', (req, res) => {
     const tagsArray = tags.split(' ').map(tag => tag.trim());
     const firstTag = tagsArray[0];
     const content = contentLines.join('\n');
-    const base64Content = Buffer.from(content).toString('base64');
 
+    // 构建格式化的文本
     const formattedText = `
 ---
 layout: post
@@ -39,6 +39,9 @@ ${tagsArray.map(tag => `    - ${tag}`).join('\n')}
 
 ${content}
     `.trim();
+
+    // 将格式化的文本进行Base64编码
+    const base64Content = Buffer.from(formattedText).toString('base64');
 
     res.json({
         title: `「${firstTag}」${title}`,
