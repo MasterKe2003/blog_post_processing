@@ -9,6 +9,9 @@ app.use(bodyParser.text());
 
 app.post("/process-text", async (req, res) => {
   const text = req.body;
+  const githubToken = process.env.GITHUB_TOKEN;
+  const githubApiUrl = process.env.GITHUB_API_URL;
+  const translate_token = process.env.TRANSLATE_API_TOKEN;
   if (!text || typeof text !== "string") {
     return res.status(400).send("Invalid input");
   }
@@ -58,7 +61,7 @@ app.post("/process-text", async (req, res) => {
   try {
     // 调用翻译API
     const response = await axios.post(
-      "https://api.ac.cx332.cn/translate?token=666",
+      "https://api.ac.cx332.cn/translate?token=" + translate_token,
       {
         text: title,
         source_lang: "ZH",
@@ -94,19 +97,38 @@ ${content}
 
     // 将格式化的文本进行Base64编码
     const base64Content = Buffer.from(formattedText).toString("base64");
+    // 添加到 Github 的代码
+    const githubResponse = await axios.put(
+      `${githubApiUrl}${fullFilename}`,
+      {
+        message: "add a post",
+        content: base64Content,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + githubToken,
+        },
+      }
+    );
+
+    // 判断 Github API 返回的状态码是否为 200，如果为 200，则文件成功创建或修改
+    if (githubResponse.status !== 200) {
+      throw new Error("Github API 请求失败");
+    }
 
     res.json({
+      msg: "success",
       title: `${title}`,
+      full_filename: fullFilename,
       tags: tagsArray,
       date: formattedTime,
       author: author,
       content: base64Content,
       filename: filename,
-      full_filename: fullFilename,
     });
   } catch (error) {
-    console.error("Error translating title:", error);
-    res.status(500).send("Error translating title");
+    console.error("Error", error);
+    res.status(500).send("Error");
   }
 });
 
