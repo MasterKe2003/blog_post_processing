@@ -25,12 +25,30 @@ app.post('/process-text', (req, res) => {
     const firstTag = tagsArray[0];
     const content = contentLines.join('\n');
 
+    // 处理日期和时间
+    let formattedDate;
+    if (date.length === 8) {
+        // 仅日期部分
+        formattedDate = `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
+    } else if (date.length === 14) {
+        // 日期和时间部分
+        const year = date.slice(0, 4);
+        const month = date.slice(4, 6);
+        const day = date.slice(6, 8);
+        const hour = date.slice(8, 10);
+        const minute = date.slice(10, 12);
+        const second = date.slice(12, 14);
+        formattedDate = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    } else {
+        return res.status(400).send('Invalid date format');
+    }
+
     // 构建格式化的文本
     const formattedText = `
 ---
 layout: post
 title: "「${firstTag}」${title}"
-date: ${date}
+date: ${formattedDate}
 author: ${author}
 header-style: text
 tags:
@@ -46,7 +64,7 @@ ${content}
     res.json({
         title: `「${firstTag}」${title}`,
         tags: tagsArray,
-        date: date,
+        date: formattedDate,
         author: author,
         content: base64Content
     });
