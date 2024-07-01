@@ -99,7 +99,7 @@ ${content}
     const base64Content = Buffer.from(formattedText).toString("base64");
     // 添加到 Github 的代码
     const githubResponse = await axios.put(
-      `${githubApiUrl}${fullFilename}`,
+      githubApiUrl + fullFilename,
       {
         message: "add a post",
         content: base64Content,
