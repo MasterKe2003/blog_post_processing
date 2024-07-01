@@ -30,6 +30,7 @@ app.post("/process-text", async (req, res) => {
 
   // 处理日期和时间
   let formattedDate;
+  let formattedTime;
   if (date.length === 8) {
     // 仅日期部分
     const year = date.slice(0, 4);
@@ -38,7 +39,8 @@ app.post("/process-text", async (req, res) => {
     const hour = "08";
     const minute = "00";
     const second = "00";
-    formattedDate = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    formattedTime = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    formattedDate = `${year}-${month}-${day}`;
   } else if (date.length === 14) {
     // 日期和时间部分
     const year = date.slice(0, 4);
@@ -47,7 +49,8 @@ app.post("/process-text", async (req, res) => {
     const hour = date.slice(8, 10);
     const minute = date.slice(10, 12);
     const second = date.slice(12, 14);
-    formattedDate = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    formattedTime = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    formattedDate = `${year}-${month}-${day}`;
   } else {
     return res.status(400).send("Invalid date format");
   }
@@ -55,16 +58,16 @@ app.post("/process-text", async (req, res) => {
   try {
     // 调用翻译API
     const response = await axios.post(
-      'https://api.ac.cx332.cn/translate?token=666',
+      "https://api.ac.cx332.cn/translate?token=666",
       {
         text: title,
         source_lang: "ZH",
-        target_lang: "EN"
+        target_lang: "EN",
       },
       {
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -79,7 +82,7 @@ app.post("/process-text", async (req, res) => {
 ---
 layout: post
 title: "「${firstTag}」${title}"
-date: ${formattedDate}
+date: ${formattedTime}
 author: ${author}
 header-style: text
 tags:
@@ -95,11 +98,11 @@ ${content}
     res.json({
       title: `${title}`,
       tags: tagsArray,
-      date: formattedDate,
+      date: formattedTime,
       author: author,
       content: base64Content,
       filename: filename,
-      full_filename: fullFilename
+      full_filename: fullFilename,
     });
   } catch (error) {
     console.error("Error translating title:", error);
