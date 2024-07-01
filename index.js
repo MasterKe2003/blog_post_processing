@@ -1,17 +1,50 @@
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
+const bodyParser = require('body-parser');
+const { Buffer } = require('buffer');
 
-app.use(express.json());
+app.use(bodyParser.text());
 
 app.post('/api', (req, res) => {
-    const { text } = req.body;
+    const text = req.body;
     if (!text || typeof text !== 'string') {
         return res.status(400).send('Invalid input');
     }
 
-    const uppercaseLetters = text.match(/[A-Z]/g) || [];
-    res.json({ uppercaseLetters });
+    // 分割输入文本
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    if (lines.length < 4) {
+        return res.status(400).send('Invalid input format');
+    }
+
+    const [title, tags, date, author, ...contentLines] = lines;
+    const tagsArray = tags.split(' ').map(tag => tag.trim());
+    const firstTag = tagsArray[0];
+    const content = contentLines.join('\n');
+    const base64Content = Buffer.from(content).toString('base64');
+
+    const formattedText = `
+---
+layout: post
+title: "「${firstTag}」${title}"
+date: ${date}
+author: ${author}
+header-style: text
+tags:
+${tagsArray.map(tag => `    - ${tag}`).join('\n')}
+---
+
+${content}
+    `.trim();
+
+    res.json({
+        title: `「${firstTag}」${title}`,
+        tags: tagsArray,
+        date: date,
+        author: author,
+        content: base64Content
+    });
 });
 
 app.listen(port, () => {
