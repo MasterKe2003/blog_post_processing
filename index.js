@@ -68,9 +68,11 @@ ${content}
 
   // 将格式化的文本进行Base64编码
   const base64Content = Buffer.from(formattedText).toString("base64");
+  // 删除标题中的「」及其中的内容
+  const cleanedTitle = title.replace(/「.*?」/g, "").trim();
 
   res.json({
-    title: `「${firstTag}」${title}`,
+    title: `「${firstTag}」${cleanedTitle}`,
     tags: tagsArray,
     date: formattedDate,
     author: author,
