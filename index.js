@@ -111,8 +111,7 @@ ${content}
       }
     );
 
-    // 判断 Github API 返回的状态码是否为 200，如果为 200，则文件成功创建或修改
-    if (githubResponse.status !== 200) {
+    if (githubResponse.status !== 201) {
       throw new Error("Github API 请求失败");
     }
 
