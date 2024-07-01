@@ -6,7 +6,7 @@ const { Buffer } = require('buffer');
 
 app.use(bodyParser.text());
 
-app.post('/api', (req, res) => {
+app.post('/process-text', (req, res) => {
     const text = req.body;
     if (!text || typeof text !== 'string') {
         return res.status(400).send('Invalid input');
@@ -14,11 +14,13 @@ app.post('/api', (req, res) => {
 
     // 分割输入文本
     const lines = text.split('\n').filter(line => line.trim() !== '');
-    if (lines.length < 4) {
+    if (lines.length < 2) {
         return res.status(400).send('Invalid input format');
     }
 
-    const [title, tags, date, author, ...contentLines] = lines;
+    // 第一行为参数行
+    const [params, ...contentLines] = lines;
+    const [title, tags, date, author] = params.split('|').map(param => param.trim());
     const tagsArray = tags.split(' ').map(tag => tag.trim());
     const firstTag = tagsArray[0];
     const content = contentLines.join('\n');
