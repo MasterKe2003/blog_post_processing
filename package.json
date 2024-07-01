@@ -1,0 +1,12 @@
+{
+  "name": "uppercase-extractor",
+  "version": "1.0.0",
+  "description": "Extracts all uppercase letters from a given text",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
