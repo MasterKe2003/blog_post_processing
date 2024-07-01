@@ -122,7 +122,6 @@ ${content}
       tags: tagsArray,
       date: formattedTime,
       author: author,
-      content: base64Content,
       filename: filename,
     });
   } catch (error) {
