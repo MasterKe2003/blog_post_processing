@@ -3,10 +3,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 const bodyParser = require("body-parser");
 const { Buffer } = require("buffer");
+const axios = require("axios");
 
 app.use(bodyParser.text());
 
-app.post("/process-text", (req, res) => {
+app.post("/process-text", async (req, res) => {
   const text = req.body;
   if (!text || typeof text !== "string") {
     return res.status(400).send("Invalid input");
@@ -51,8 +52,30 @@ app.post("/process-text", (req, res) => {
     return res.status(400).send("Invalid date format");
   }
 
-  // 构建格式化的文本
-  const formattedText = `
+  try {
+    // 调用翻译API
+    const response = await axios.post(
+      'https://api.ac.cx332.cn/translate?token=666',
+      {
+        text: title,
+        source_lang: "ZH",
+        target_lang: "EN"
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const translatedTitle = response.data.data;
+    const filename = translatedTitle
+      .replace(/[^a-zA-Z0-9\s]/g, "") // 删除非字母和数字的内容
+      .replace(/\s+/g, "_"); // 将单词和单词之间用下划线代替
+    const fullFilename = `${formattedDate}-${filename}.md`;
+
+    // 构建格式化的文本
+    const formattedText = `
 ---
 layout: post
 title: "「${firstTag}」${title}"
@@ -66,16 +89,22 @@ ${tagsArray.map((tag) => `    - ${tag}`).join("\n")}
 ${content}
     `.trim();
 
-  // 将格式化的文本进行Base64编码
-  const base64Content = Buffer.from(formattedText).toString("base64");
+    // 将格式化的文本进行Base64编码
+    const base64Content = Buffer.from(formattedText).toString("base64");
 
-  res.json({
-    title: `${title}`,
-    tags: tagsArray,
-    date: formattedDate,
-    author: author,
-    content: base64Content,
-  });
+    res.json({
+      title: `${title}`,
+      tags: tagsArray,
+      date: formattedDate,
+      author: author,
+      content: base64Content,
+      filename: filename,
+      full_filename: fullFilename
+    });
+  } catch (error) {
+    console.error("Error translating title:", error);
+    res.status(500).send("Error translating title");
+  }
 });
 
 app.listen(port, () => {
