@@ -85,7 +85,7 @@ app.post("/process-text", async (req, res) => {
 ---
 layout: post
 title: "「${firstTag}」${title}"
-date: ${formattedTime}
+date: ${formattedTime} +8000
 author: ${author}
 header-style: text
 tags:
